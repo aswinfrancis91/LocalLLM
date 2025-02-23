@@ -1,12 +1,15 @@
 ﻿from llama_index.core import SimpleDirectoryReader
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
-from llama_index.vector_stores import ChromaVectorStore
+from llama_index.vector_stores.chroma.base import ChromaVectorStore
 from llama_index.core import StorageContext, VectorStoreIndex
 import chromadb
 from dotenv import load_dotenv
 import os
+import logging
 
 load_dotenv()  # Load environment variables from .env file
+
+logging.basicConfig(level=logging.DEBUG)
 
 repo_path = os.getenv("SOURCE_PATH", "default_path_if_not_set")
 
@@ -36,3 +39,5 @@ index = VectorStoreIndex.from_documents(docs, storage_context=storage_context, e
 
 # persist index
 index.storage_context.persist()
+
+print(f"Done persisting")
