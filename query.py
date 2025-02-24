@@ -1,16 +1,20 @@
-﻿import chromadb
+﻿import logging
+import chromadb
 from llama_index.core import VectorStoreIndex, SummaryIndex
 from llama_index.core.schema import IndexNode
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.core import StorageContext
-from config import PERSIST_DIR_CODE, PERSIST_DIR_TEXT, CODE_EMBED_MODEL, TEXT_EMBED_MODEL, LLM_MODEL
+from config import PERSIST_DIR_CODE, PERSIST_DIR_TEXT, CODE_EMBED_MODEL, TEXT_EMBED_MODEL, LLM_MODEL, \
+    UNIFIED_CODE_INDEX, UNIFIED_TEXT_INDEX
+
+logging.basicConfig(level=logging.DEBUG)
 
 # Persistent clients for code and text
 code_chroma_client = chromadb.PersistentClient(path=PERSIST_DIR_CODE)
 text_chroma_client = chromadb.PersistentClient(path=PERSIST_DIR_TEXT)
 
 # Fetch code index
-code_chroma_collection = code_chroma_client.get_or_create_collection(name="code_index")
+code_chroma_collection = code_chroma_client.get_or_create_collection(name=UNIFIED_CODE_INDEX)
 code_vector_store = ChromaVectorStore(chroma_collection=code_chroma_collection)
 code_storage_context = StorageContext.from_defaults(vector_store=code_vector_store)
 code_index = VectorStoreIndex.from_vector_store(vector_store=code_vector_store,
@@ -19,7 +23,7 @@ code_index = VectorStoreIndex.from_vector_store(vector_store=code_vector_store,
 code_index_retriever = code_index.as_retriever(similarity_top_k=2)
 
 # Fetch text index
-text_chroma_collection = text_chroma_client.get_or_create_collection(name="text_index")
+text_chroma_collection = text_chroma_client.get_or_create_collection(name=UNIFIED_TEXT_INDEX)
 text_vector_store = ChromaVectorStore(chroma_collection=text_chroma_collection)
 text_storage_context = StorageContext.from_defaults(vector_store=text_vector_store)
 text_index = VectorStoreIndex.from_vector_store(vector_store=text_vector_store,
@@ -37,7 +41,7 @@ code_obj = IndexNode(
 summary_index = SummaryIndex(objects=[text_obj, code_obj])
 
 # Query engine setup
-query_engine = summary_index.as_query_engine(llm=LLM_MODEL)
+query_engine = summary_index.as_query_engine(llm=LLM_MODEL, verbose=True)
 
 query = "How does authentication work in this project?"
 response = query_engine.query(query)

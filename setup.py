@@ -4,16 +4,18 @@ from llama_index.vector_stores.chroma.base import ChromaVectorStore
 from llama_index.core import StorageContext, VectorStoreIndex
 import chromadb
 import logging
-from config import SOURCE_PATH, PERSIST_DIR_CODE, PERSIST_DIR_TEXT, CODE_EMBED_MODEL, TEXT_EMBED_MODEL
+from config import SOURCE_PATH, PERSIST_DIR_CODE, PERSIST_DIR_TEXT, CODE_EMBED_MODEL, TEXT_EMBED_MODEL, \
+    UNIFIED_CODE_INDEX, UNIFIED_TEXT_INDEX
 
 logging.basicConfig(level=logging.DEBUG)
 
+print("Deleted existing indexes. Recreating...")
 # Load and separate documents
 all_docs = SimpleDirectoryReader(
     input_dir=SOURCE_PATH,
     recursive=True,
     required_exts=[".cs", ".json", ".md", ".ts", ".css", ".csproj", ".sln", ".yaml"],
-    exclude=["node_modules", ".idea", ".azuredevops", ".vscode", ".git", ".gitignore", ".vs", "bin"]
+    exclude=["node_modules", ".idea", ".azuredevops", ".vscode", ".git", ".gitignore", ".vs", "bin", "AzFaaS.UAuthComponent", "Pact.Hook.UAuthComponent", "Test.ClientSDK.UAuthComponent","Test.Pact.UAuthComponent","Test.Repository.UAuthComponent","Test.Service.UAuthComponent","Test.WebApi.UAuthComponent"]
 ).load_data()
 
 code_extensions = {".cs", ".ts", ".css", ".csproj", ".sln", ".yaml"}
@@ -30,19 +32,19 @@ code_chroma_client = chromadb.PersistentClient(path=PERSIST_DIR_CODE)
 text_chroma_client = chromadb.PersistentClient(path=PERSIST_DIR_TEXT)
 
 # Create code index
-code_chroma_collection = code_chroma_client.get_or_create_collection(name="code_index")
+code_chroma_collection = code_chroma_client.get_or_create_collection(name=UNIFIED_CODE_INDEX)
 code_vector_store = ChromaVectorStore(chroma_collection=code_chroma_collection)
 code_storage_context = StorageContext.from_defaults(vector_store=code_vector_store)
 code_index = VectorStoreIndex.from_documents(code_docs, storage_context=code_storage_context,
                                              embed_model=CODE_EMBED_MODEL)
-code_index.storage_context.persist()
+code_index.storage_context.persist(persist_dir=PERSIST_DIR_CODE)
 
 # Create text index
-text_chroma_collection = text_chroma_client.get_or_create_collection(name="text_index")
+text_chroma_collection = text_chroma_client.get_or_create_collection(name=UNIFIED_TEXT_INDEX)
 text_vector_store = ChromaVectorStore(chroma_collection=text_chroma_collection)
 text_storage_context = StorageContext.from_defaults(vector_store=text_vector_store)
 text_index = VectorStoreIndex.from_documents(text_docs, storage_context=text_storage_context,
                                              embed_model=TEXT_EMBED_MODEL)
-text_index.storage_context.persist()
+text_index.storage_context.persist(persist_dir=PERSIST_DIR_TEXT)
 
 print("Finished creating and persisting indices.")

@@ -20,4 +20,5 @@ TEXT_EMBED_MODEL = HuggingFaceEmbedding(model_name="sentence-transformers/all-Mi
 # LLM Model
 LLM_MODEL = Ollama(model="codellama:7b-instruct", request_timeout=1800)
 
-# Other default settings and global service context if needed
+UNIFIED_CODE_INDEX= "unified_code_index"
+UNIFIED_TEXT_INDEX= "unified_text_index"
