@@ -7,15 +7,15 @@ from config import SOURCE_PATH, PERSIST_DIR, CODE_INDEX, EMBED_MODEL
 
 logging.basicConfig(level=logging.DEBUG)
 
-# Load and separate documents
+# Load code and related files
 all_docs = SimpleDirectoryReader(
     input_dir=SOURCE_PATH,
     recursive=True,
     required_exts=[".cs", ".json", ".md", ".ts", ".css", ".csproj", ".sln", ".yaml"],
-    exclude=["node_modules", ".idea", ".azuredevops", ".vscode", ".git", ".gitignore", ".vs", "bin", "AzFaaS.UAuthComponent", "Pact.Hook.UAuthComponent", "Test.ClientSDK.UAuthComponent","Test.Pact.UAuthComponent","Test.Repository.UAuthComponent","Test.Service.UAuthComponent","Test.WebApi.UAuthComponent"]
+    exclude=["node_modules", ".idea", ".azuredevops", ".vscode", ".git", ".gitignore", ".vs", "bin"]
 ).load_data()
 
-# Create a persistent client for code and text indices
+# Create a persistent client for indices
 chroma_client = chromadb.PersistentClient(path=PERSIST_DIR)
 
 # Create code index

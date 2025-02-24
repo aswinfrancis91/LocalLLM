@@ -18,6 +18,7 @@ index = VectorStoreIndex.from_vector_store(vector_store=vector_store,
                                                 storage_context=storage_context,
                                                 embed_model=EMBED_MODEL)
 
+
 query_engine = index.as_query_engine(llm=LLM_MODEL)
 
 query = "Write unit test using nunit and moq for AuthenticatedPing() method in PingController"
